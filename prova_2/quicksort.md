@@ -4,13 +4,13 @@ Esta revisão reúne os conceitos centrais do Quicksort, seu funcionamento, sua 
 
 ## 1. Introdução
 
-O Quicksort é um algoritmo de ordenação baseado na estratégia de divisão e conquista (divide-and-conquer). Ele organiza os elementos de um vetor por meio de partições sucessivas em torno de um pivô.
+O Quicksort é um algoritmo de ordenação baseado na estratégia de divisão e conquista (_divide-and-conquer_). Ele organiza os elementos de um vetor por meio de partições sucessivas em torno de um pivô.
 
 A estratégia possui três etapas:
 
-1. Divisão: particionar o vetor em torno de um pivô.
-2. Conquista: ordenar recursivamente as partições resultantes.
-3. Combinação: não é necessária uma etapa explícita de combinação, pois as partições ficam organizadas no próprio vetor.
+1. **Divisão:** particionar o vetor em torno de um pivô.
+2. **Conquista:** ordenar recursivamente as partições resultantes.
+3. **Combinação:** não é necessária uma etapa explícita de combinação, pois as partições ficam organizadas no próprio vetor.
 
 Diferentemente do Merge Sort, que combina subvetores ordenados ao final, o Quicksort realiza a maior parte do trabalho durante a partição.
 
@@ -20,7 +20,7 @@ O algoritmo utiliza dois procedimentos principais: `QUICKSORT` e `PARTITION`.
 
 ### 2.1. Pseudocódigo do Quicksort
 
-```
+```text
 QUICKSORT(A, p, r)
     if p < r
         q = PARTITION(A, p, r)
@@ -39,9 +39,9 @@ A condição `p < r` é o caso-base implícito: se o subvetor tem zero ou um ele
 
 ### 2.2. Procedimento PARTITION
 
-Na versão apresentada pelo CLRS, o pivô é o último elemento do subvetor, \\(A[r]\\).
+Na versão apresentada pelo CLRS, o pivô é o último elemento do subvetor, $A[r]$.
 
-```
+```text
 PARTITION(A, p, r)
     x = A[r]
     i = p - 1
@@ -67,17 +67,17 @@ O pivô não participa das chamadas recursivas seguintes, pois já está em sua 
 
 Considere o vetor:
 
-\\[ A=[4,2,7,3,6] \\]
+$$A = [4,2,7,3,6]$$
 
-O pivô inicial é \\(6\\). Após a partição, os elementos menores ou iguais a \\(6\\) ficam à esquerda e os maiores ficam à direita. Uma possível disposição após a partição é:
+O pivô inicial é $6$. Após a partição, os elementos menores ou iguais a $6$ ficam à esquerda e os maiores ficam à direita. Uma possível disposição após a partição é:
 
-\\[ [4,2,3,\boxed{6},7] \\]
+$$[4,2,3,\boxed{6},7]$$
 
-O pivô ficou na posição correta. O algoritmo agora ordena recursivamente os subvetores \\([4,2,3]\\) e \\([7]\\). O segundo já está ordenado por conter apenas um elemento.
+O pivô ficou na posição correta. O algoritmo agora ordena recursivamente os subvetores $[4,2,3]$ e $[7]$. O segundo já está ordenado por conter apenas um elemento.
 
 O resultado final é:
 
-\\[ [2,3,4,6,7] \\]
+$$[2,3,4,6,7]$$
 
 A ordem dos elementos dentro de cada partição pode variar conforme a implementação; o importante é respeitar a relação com o pivô.
 
@@ -91,61 +91,61 @@ O melhor caso ocorre quando as partições ficam aproximadamente equilibradas, d
 
 Para simplificar, suponha que cada chamada divide o vetor em duas metades:
 
-\\[ T(n)=2T(n/2)+\Theta(n) \\]
+$$T(n) = 2T(n/2) + \Theta(n)$$
 
-O termo \\(\Theta(n)\\) representa o custo da partição. Pelo Teorema Mestre:
+O termo $\Theta(n)$ representa o custo da partição. Pelo Teorema Mestre:
 
-\\[ \boxed{T(n)=\Theta(n\lg n)} \\]
+$$\boxed{T(n) = \Theta(n \lg n)}$$
 
 ### 3.2. Pior caso
 
-O pior caso ocorre quando uma partição contém \\(n-1\\) elementos e a outra contém zero elementos. Isso pode acontecer, por exemplo, quando o pivô escolhido é sempre o menor ou o maior elemento.
+O pior caso ocorre quando uma partição contém $n-1$ elementos e a outra contém zero elementos. Isso pode acontecer, por exemplo, quando o pivô escolhido é sempre o menor ou o maior elemento.
 
 A recorrência é:
 
-\\[ T(n)=T(n-1)+T(0)+\Theta(n) \\]
+$$T(n) = T(n-1) + T(0) + \Theta(n)$$
 
-Como \\(T(0)=\Theta(1)\\), podemos simplificar para:
+Como $T(0) = \Theta(1)$, podemos simplificar para:
 
-\\[ T(n)=T(n-1)+\Theta(n) \\]
+$$T(n) = T(n-1) + \Theta(n)$$
 
 Expandindo a recorrência, obtemos uma soma proporcional a:
 
-\\[ 1+2+3+\cdots+n=\Theta(n^2) \\]
+$$1 + 2 + 3 + \cdots + n = \Theta(n^2)$$
 
 Portanto:
 
-\\[ \boxed{T(n)=\Theta(n^2)} \\]
+$$\boxed{T(n) = \Theta(n^2)}$$
 
-Nesse caso, a árvore de recursão fica semelhante a uma sequência de nós, um abaixo do outro. Sua altura é \\(\Theta(n)\\).
+Nesse caso, a árvore de recursão fica semelhante a uma sequência de nós, um abaixo do outro. Sua altura é $\Theta(n)$.
 
 ### 3.3. Caso médio
 
 No caso médio, as partições não precisam ser exatamente iguais. Desde que o comportamento médio produza divisões suficientemente equilibradas, o tempo de execução permanece:
 
-\\[ \boxed{T(n)=\Theta(n\lg n)} \\]
+$$\boxed{T(n) = \Theta(n \lg n)}$$
 
 É importante distinguir os conceitos:
 
-| Característica        | Partições equilibradas | Pior caso                                                                        |
-| --------------------- | ---------------------- | -------------------------------------------------------------------------------- |
-| Altura da árvore      | \\(\Theta(\lg n)\\)    | \\(\Theta(n)\\)                                                                  |
-| Custo total por nível | \\(\Theta(n)\\)        | Não é \\(\Theta(n)\\) em todos os níveis; diminui conforme o subproblema encolhe |
-| Tempo total           | \\(\Theta(n\lg n)\\)   | \\(\Theta(n^2)\\)                                                                |
+| Característica        | Partições equilibradas | Pior caso                                                                    |
+| --------------------- | ---------------------- | ---------------------------------------------------------------------------- |
+| Altura da árvore      | $\Theta(\lg n)$        | $\Theta(n)$                                                                  |
+| Custo total por nível | $\Theta(n)$            | Não é $\Theta(n)$ em todos os níveis; diminui conforme o subproblema encolhe |
+| Tempo total           | $\Theta(n \lg n)$      | $\Theta(n^2)$                                                                |
 
-No pior caso, portanto, não se deve multiplicar simplesmente \\(n\\) níveis por um custo de \\(\Theta(n)\\) em todos eles. O correto é somar os custos das partições, que diminuem de \\(n\\) para \\(n-1\\), depois \\(n-2\\), e assim por diante.
+No pior caso, portanto, não se deve multiplicar simplesmente $n$ níveis por um custo de $\Theta(n)$ em todos eles. O correto é somar os custos das partições, que diminuem de $n$ para $n-1$, depois $n-2$, e assim por diante.
 
 ## 4. Versão aleatorizada do Quicksort
 
 O Quicksort tradicional pode escolher sempre o último elemento como pivô. Essa escolha pode ser desfavorável para determinados vetores.
 
-O Quicksort aleatorizado (Randomized Quicksort) escolhe o pivô aleatoriamente entre os elementos do subvetor. No CLRS, isso é feito com o procedimento `RANDOMIZED-PARTITION`.
+O Quicksort aleatorizado (_Randomized Quicksort_) escolhe o pivô aleatoriamente entre os elementos do subvetor. No CLRS, isso é feito com o procedimento `RANDOMIZED-PARTITION`.
 
 A ideia é reduzir a dependência entre a ordem inicial dos elementos e a qualidade das partições.
 
 O procedimento funciona assim:
 
-1. Seleciona aleatoriamente um índice entre \\(p\\) e \\(r\\).
+1. Seleciona aleatoriamente um índice entre $p$ e $r$.
 2. Troca o elemento selecionado com o último elemento do subvetor.
 3. Executa o procedimento `PARTITION` convencional.
 4. Continua recursivamente com as partições à esquerda e à direita do pivô.
@@ -154,10 +154,10 @@ A aleatorização não garante que todas as partições sejam equilibradas. Ela 
 
 As complexidades principais são:
 
-- Tempo esperado: \\(\Theta(n\lg n)\\).
-- Pior caso: \\(\Theta(n^2)\\).
+- Tempo esperado: $\Theta(n \lg n)$.
+- Pior caso: $\Theta(n^2)$.
 
-O pior caso continua possível. A vantagem é que o tempo esperado é \\(\Theta(n\lg n)\\), independentemente da ordem inicial dos elementos, considerando as escolhas aleatórias do algoritmo.
+O pior caso continua possível. A vantagem é que o tempo esperado é $\Theta(n \lg n)$, independentemente da ordem inicial dos elementos, considerando as escolhas aleatórias do algoritmo.
 
 ## 5. Análise do Quicksort
 
@@ -167,28 +167,28 @@ Para analisar o Quicksort, é necessário observar três elementos: o custo da p
 
 O procedimento `PARTITION` percorre o subvetor uma vez, realizando um número de operações proporcional ao número de elementos.
 
-Assim, para um subvetor de tamanho \\(n\\):
+Assim, para um subvetor de tamanho $n$:
 
-\\[ \boxed{\text{PARTITION}=\Theta(n)} \\]
+$$\boxed{\text{PARTITION} = \Theta(n)}$$
 
 Esse custo é linear, independentemente de a divisão resultante ser equilibrada ou desequilibrada.
 
 ### 5.2. Recorrência geral
 
-Se o pivô deixa \\(q\\) elementos à esquerda, então ficam \\(n-q-1\\) elementos à direita. A recorrência geral é:
+Se o pivô deixa $q$ elementos à esquerda, então ficam $n-q-1$ elementos à direita. A recorrência geral é:
 
-\\[ T(n)=T(q)+T(n-q-1)+\Theta(n) \\]
+$$T(n) = T(q) + T(n-q-1) + \Theta(n)$$
 
 Essa expressão permite analisar os diferentes casos de execução.
 
-- Se \\(q\\) for aproximadamente \\(n/2\\), temos divisões equilibradas e tempo \\(\Theta(n\lg n)\\).
-- Se \\(q=0\\) ou \\(q=n-1\\) repetidamente, temos divisões extremamente desequilibradas e tempo \\(\Theta(n^2)\\).
+- Se $q$ for aproximadamente $n/2$, temos divisões equilibradas e tempo $\Theta(n \lg n)$.
+- Se $q = 0$ ou $q = n-1$ repetidamente, temos divisões extremamente desequilibradas e tempo $\Theta(n^2)$.
 
 ### 5.3. Propriedades importantes
 
-O Quicksort é um algoritmo in-place. Ele reorganiza os elementos no próprio vetor e utiliza apenas uma quantidade limitada de memória auxiliar por chamada, além da pilha de recursão.
+O Quicksort é um algoritmo _in-place_. Ele reorganiza os elementos no próprio vetor e utiliza apenas uma quantidade limitada de memória auxiliar por chamada, além da pilha de recursão.
 
-Entretanto, o espaço ocupado pela pilha depende da altura da recursão: costuma ser \\(O(\lg n)\\) em execuções equilibradas e pode chegar a \\(O(n)\\) no pior caso.
+Entretanto, o espaço ocupado pela pilha depende da altura da recursão: costuma ser $O(\lg n)$ em execuções equilibradas e pode chegar a $O(n)$ no pior caso.
 
 O Quicksort não é estável em sua implementação convencional. Um algoritmo estável preserva a ordem relativa dos elementos com chaves iguais; o Quicksort convencional não oferece essa garantia.
 
@@ -196,21 +196,21 @@ O Quicksort não é estável em sua implementação convencional. Um algoritmo e
 
 Os algoritmos de ordenação por comparação determinam a ordem dos elementos comparando pares de chaves. Quicksort, Merge Sort, Heapsort e Insertion Sort são exemplos.
 
-| Algoritmo      | Melhor caso          | Caso médio                      | Pior caso            | Espaço auxiliar                                                   |
-| -------------- | -------------------- | ------------------------------- | -------------------- | ----------------------------------------------------------------- |
-| Insertion Sort | \\(\Theta(n)\\)      | \\(\Theta(n^2)\\)               | \\(\Theta(n^2)\\)    | \\(O(1)\\)                                                        |
-| Merge Sort     | \\(\Theta(n\lg n)\\) | \\(\Theta(n\lg n)\\)            | \\(\Theta(n\lg n)\\) | \\(O(n)\\)                                                        |
-| Heapsort       | \\(\Theta(n\lg n)\\) | \\(\Theta(n\lg n)\\)            | \\(\Theta(n\lg n)\\) | \\(O(1)\\)                                                        |
-| Quicksort      | \\(\Theta(n\lg n)\\) | \\(\Theta(n\lg n)\\)            | \\(\Theta(n^2)\\)    | \\(O(\lg n)\\) em execuções equilibradas; \\(O(n)\\) no pior caso |
-| Intro Sort     | —                    | Geralmente \\(\Theta(n\lg n)\\) | \\(O(n\lg n)\\)      | Depende da implementação                                          |
+| Algoritmo      | Melhor caso       | Caso médio                   | Pior caso         | Espaço auxiliar                                           |
+| -------------- | ----------------- | ---------------------------- | ----------------- | --------------------------------------------------------- |
+| Insertion Sort | $\Theta(n)$       | $\Theta(n^2)$                | $\Theta(n^2)$     | $O(1)$                                                    |
+| Merge Sort     | $\Theta(n \lg n)$ | $\Theta(n \lg n)$            | $\Theta(n \lg n)$ | $O(n)$                                                    |
+| Heapsort       | $\Theta(n \lg n)$ | $\Theta(n \lg n)$            | $\Theta(n \lg n)$ | $O(1)$                                                    |
+| Quicksort      | $\Theta(n \lg n)$ | $\Theta(n \lg n)$            | $\Theta(n^2)$     | $O(\lg n)$ em execuções equilibradas; $O(n)$ no pior caso |
+| Intro Sort     | —                 | Geralmente $\Theta(n \lg n)$ | $O(n \lg n)$      | Depende da implementação                                  |
 
-O Intro Sort combina Quicksort, Heapsort e, normalmente, Insertion Sort para pequenas partições. Sua principal vantagem é preservar o bom desempenho prático do Quicksort e garantir complexidade \\(O(n\lg n)\\) no pior caso.
+O Intro Sort combina Quicksort, Heapsort e, normalmente, Insertion Sort para pequenas partições. Sua principal vantagem é preservar o bom desempenho prático do Quicksort e garantir complexidade $O(n \lg n)$ no pior caso.
 
 ### Limite inferior da ordenação por comparação
 
 O modelo de árvore de decisão demonstra que qualquer algoritmo de ordenação baseado exclusivamente em comparações precisa realizar, no pior caso, pelo menos:
 
-\\[ \boxed{\Omega(n\lg n)} \\]
+$$\boxed{\Omega(n \lg n)}$$
 
 comparações.
 
@@ -222,15 +222,15 @@ Esse limite não se aplica da mesma forma a algoritmos que exploram característ
 
 ### 7.1. Quicksort com Insertion Sort para pequenas partições
 
-Uma otimização prática consiste em interromper a recursão do Quicksort quando o subvetor fica menor que um limite \\(k\\), ordenando-o com Insertion Sort.
+Uma otimização prática consiste em interromper a recursão do Quicksort quando o subvetor fica menor que um limite $k$, ordenando-o com Insertion Sort.
 
 O custo pode ser expresso como:
 
-\\[ O(nk+n\lg(n/k)) \\]
+$$O(nk + n \lg(n/k))$$
 
-O termo \\(O(nk)\\) corresponde ao custo de ordenar as pequenas partições por Insertion Sort, considerando o pior caso de cada uma. O termo \\(O(n\lg(n/k))\\) representa o custo das partições do Quicksort até atingir subvetores de tamanho menor que \\(k\\), sob a hipótese de divisões equilibradas.
+O termo $O(nk)$ corresponde ao custo de ordenar as pequenas partições por Insertion Sort, considerando o pior caso de cada uma. O termo $O(n \lg(n/k))$ representa o custo das partições do Quicksort até atingir subvetores de tamanho menor que $k$, sob a hipótese de divisões equilibradas.
 
-Na teoria, escolher \\(k\\) como uma constante permite manter a complexidade \\(O(n\lg n)\\). Na prática, o melhor valor depende da implementação e do ambiente de execução.
+Na teoria, escolher $k$ como uma constante permite manter a complexidade $O(n \lg n)$. Na prática, o melhor valor depende da implementação e do ambiente de execução.
 
 ### 7.2. Particionamento pela mediana de três elementos
 
@@ -242,13 +242,13 @@ Essa estratégia tende a evitar pivôs extremamente pequenos ou grandes, favorec
 
 Em exercícios de análise, pode ser necessário demonstrar que uma expressão como
 
-\\[ q^2+(n-q-1)^2 \\]
+$$q^2 + (n-q-1)^2$$
 
-atinge seu máximo quando \\(q=0\\) ou \\(q=n-1\\). A ideia é reescrever a expressão como:
+atinge seu máximo quando $q = 0$ ou $q = n-1$. A ideia é reescrever a expressão como:
 
-\\[ (n-1)^2-2q(n-q-1) \\]
+$$(n-1)^2 - 2q(n-q-1)$$
 
-Como \\(0\le q\le n-1\\), o produto \\(q(n-q-1)\\) é não negativo. Logo, a expressão não ultrapassa \\((n-1)^2\\), atingindo esse valor nos extremos.
+Como $0 \le q \le n-1$, o produto $q(n-q-1)$ é não negativo. Logo, a expressão não ultrapassa $(n-1)^2$, atingindo esse valor nos extremos.
 
 Esse tipo de resultado ajuda a entender por que partições muito desequilibradas produzem subproblemas grandes e podem levar ao pior caso quadrático.
 
@@ -256,20 +256,28 @@ Esse tipo de resultado ajuda a entender por que partições muito desequilibrada
 
 Confira se consegue responder sem consultar o material:
 
-Use as perguntas para revisar. Selecione uma para conferir a resposta.
+1. **Qual é a estratégia usada pelo Quicksort?**
+   Divisão e conquista: particiona o vetor em torno de um pivô e ordena recursivamente os subvetores.
 
-1\. Qual é a estratégia usada pelo Quicksort?
+2. **Qual é o custo de PARTITION?**
+   $\Theta(n)$, porque percorre o subvetor uma vez.
 
-2\. Qual é o custo de PARTITION?
+3. **Quando ocorre o pior caso?**
+   Quando as partições são repetidamente muito desequilibradas, com tamanhos $n-1$ e $0$.
 
-3\. Quando ocorre o pior caso?
+4. **Qual é a complexidade do pior caso?**
+   $\Theta(n^2)$, pois o custo acumulado é proporcional a $n + (n-1) + \cdots + 1$.
 
-4\. Qual é a complexidade do pior caso?
+5. **Qual é o tempo esperado do Quicksort aleatorizado?**
+   $\Theta(n \lg n)$. A aleatorização não elimina o pior caso $\Theta(n^2)$, mas oferece tempo esperado $\Theta(n \lg n)$.
 
-5\. Qual é o tempo esperado do Quicksort aleatorizado?
+6. **O Quicksort é estável?**
+   Não, na implementação convencional.
 
-6\. O Quicksort é estável?
+7. **Qual é a principal vantagem do Intro Sort?**
+   Combina o desempenho prático do Quicksort com a garantia $O(n \lg n)$ no pior caso, recorrendo ao Heapsort quando necessário.
 
-7\. Qual é a principal vantagem do Intro Sort?
+8. **Qual é o limite inferior para ordenação por comparação?**
+   $\Omega(n \lg n)$ comparações no pior caso.
 
-8\. Qual é o limite inferior para ordenação por comparação?
+**Prioridade de estudo:** entenda o funcionamento de `PARTITION`, saiba explicar a diferença entre o caso equilibrado e o pior caso, domine as recorrências $T(n) = 2T(n/2) + \Theta(n)$ e $T(n) = T(n-1) + \Theta(n)$, e compreenda a finalidade da aleatorização. A análise detalhada do tempo esperado do Quicksort aleatorizado pode ficar em segundo plano, conforme a orientação da disciplina.
