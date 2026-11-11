@@ -1,0 +1,1034 @@
+# Aula-resumo para a prova de Algoritmos
+
+Este resumo reúne os conteúdos que você estudou: programação dinâmica, corte de hastes, multiplicação de cadeias de matrizes, LCS, grafos, buscas, árvores e complexidade computacional (P, NP e NP-Completo).
+
+A ideia é servir como material de revisão, com **definições, fórmulas, recorrências, complexidades e propriedades importantes para questões de múltipla escolha e somatória**.
+
+# 1. Programação dinâmica
+
+Programação dinâmica (PD) é uma técnica utilizada para resolver problemas que apresentam:
+
+- **Subestrutura ótima:** uma solução ótima pode ser construída a partir de soluções ótimas de subproblemas.
+- **Subproblemas sobrepostos:** os mesmos subproblemas são resolvidos repetidamente.
+
+Existem duas abordagens:
+
+| Abordagem | Característica |
+|---|---|
+| Top-down (memoização) | Recursão + armazenamento dos resultados |
+| Bottom-up | Resolve os menores subproblemas primeiro, iterativamente |
+
+A PD evita recalcular subproblemas já resolvidos.
+
+## 1.1 Corte de hastes (Rod Cutting)
+
+O problema consiste em uma haste de comprimento \(n\), com preços \(p_i\) para hastes de comprimento \(i\). Queremos maximizar a receita.
+
+### Recorrência
+
+\[
+\boxed{r_n=\max_{1\leq i\leq n}(p_i+r_{n-i})}
+\]
+
+Condição inicial:
+
+\[
+\boxed{r_0=0}
+\]
+
+Interpretação:
+
+- \(p_i\): preço da primeira haste cortada.
+- \(r_{n-i}\): receita ótima do restante.
+- O máximo escolhe a melhor primeira divisão.
+
+### Algoritmos e complexidades
+
+| Algoritmo | Complexidade temporal | Espaço |
+|---|---:|---:|
+| CUT-ROD (recursivo) | \(\Theta(2^n)\) | \(\Theta(n)\) pilha |
+| MEMOIZED-CUT-ROD | \(\Theta(n^2)\) | \(\Theta(n)\) |
+| BOTTOM-UP-CUT-ROD | \(\Theta(n^2)\) | \(\Theta(n)\) |
+
+A versão recursiva possui complexidade exponencial porque recalcula os mesmos subproblemas.
+
+A memoização e a abordagem bottom-up calculam cada subproblema uma única vez.
+
+### Custo de corte
+
+Se cada corte custa \(c\), a recorrência passa a ser:
+
+\[
+\boxed{r_n=\max_{1\leq i\leq n}(p_i+r_{n-i}-c)}
+\]
+
+com:
+
+\[
+r_0=0
+\]
+
+Atenção: quando \(i=n\), não ocorre corte. Portanto, a implementação deve evitar descontar \(c\) nesse caso.
+
+## 1.2 Fibonacci
+
+Recorrência:
+
+\[
+F_n=F_{n-1}+F_{n-2}
+\]
+
+Condições iniciais:
+
+\[
+F_0=0,\qquad F_1=1
+\]
+
+| Método | Complexidade |
+|---|---:|
+| Recursivo ingênuo | \(\Theta(2^n)\) |
+| Dinâmico iterativo | \(\Theta(n)\) |
+| Espaço do iterativo otimizado | \(\Theta(1)\) |
+
+---
+
+# 2. Multiplicação de cadeias de matrizes
+
+Queremos encontrar a parentização que minimiza o número de multiplicações escalares, não necessariamente realizar as multiplicações imediatamente.
+
+Se:
+
+\[
+A_1:A_{p_0\times p_1}
+\]
+
+\[
+A_2:A_{p_1\times p_2}
+\]
+
+\[
+\cdots
+\]
+
+\[
+A_n:A_{p_{n-1}\times p_n}
+\]
+
+Então o vetor de dimensões é:
+
+\[
+\boxed{p=(p_0,p_1,\ldots,p_n)}
+\]
+
+## 2.1 Fórmula principal
+
+\[
+\boxed{
+m[i,j]=
+\begin{cases}
+0,&i=j\\
+\min\limits_{i\leq k<j}
+\{m[i,k]+m[k+1,j]+p_{i-1}p_kp_j\},&i<j
+\end{cases}
+}
+\]
+
+Interpretação:
+
+- \(m[i,j]\): custo mínimo para multiplicar \(A_i\cdots A_j\).
+- \(k\): posição onde dividimos a cadeia.
+- \(m[i,k]\): custo da parte esquerda.
+- \(m[k+1,j]\): custo da parte direita.
+- \(p_{i-1}p_kp_j\): custo da multiplicação final.
+
+O algoritmo `MATRIX-CHAIN-ORDER` calcula duas tabelas:
+
+| Tabela | Finalidade |
+|---|---|
+| \(m[i,j]\) | Custo mínimo |
+| \(s[i,j]\) | Índice \(k\) da divisão ótima |
+
+A tabela \(s\) permite reconstruir a parentização ótima.
+
+## 2.2 Complexidade
+
+\[
+\boxed{\Theta(n^3)\text{ tempo}}
+\]
+
+\[
+\boxed{\Theta(n^2)\text{ espaço}}
+\]
+
+O tempo é cúbico porque:
+
+- Existem \(\Theta(n^2)\) subproblemas.
+- Cada subproblema pode testar até \(O(n)\) posições de divisão.
+
+### Qual fórmula usar?
+
+Se a questão pedir:
+
+- **Custo mínimo:** usar \(m[i,j]\).
+- **Parentização ótima:** usar \(s[i,j]\).
+- **Realizar efetivamente a multiplicação:** usar `MATRIX-CHAIN-MULTIPLY`.
+- **Número de multiplicações escalares:** calcular o custo da recorrência.
+
+---
+
+# 3. Maior subsequência comum (LCS)
+
+O problema LCS consiste em encontrar a maior subsequência comum entre duas sequências.
+
+Uma subsequência não precisa ser contígua, mas deve preservar a ordem dos elementos.
+
+Sejam:
+
+\[
+X=(x_1,x_2,\ldots,x_m)
+\]
+
+\[
+Y=(y_1,y_2,\ldots,y_n)
+\]
+
+Definimos:
+
+\[
+c[i,j]=\text{comprimento da LCS de }X_i\text{ e }Y_j
+\]
+
+## 3.1 Recorrência
+
+\[
+\boxed{
+c[i,j]=
+\begin{cases}
+0,&i=0\text{ ou }j=0\\
+c[i-1,j-1]+1,&x_i=y_j\\
+\max(c[i-1,j],c[i,j-1]),&x_i\neq y_j
+\end{cases}
+}
+\]
+
+### Como interpretar?
+
+Se os últimos elementos são iguais:
+
+\[
+x_i=y_j
+\]
+
+Eles pertencem a uma LCS, e podemos acrescentar 1 à solução anterior.
+
+Se são diferentes, descartamos um dos últimos elementos e escolhemos a melhor solução.
+
+## 3.2 Complexidade
+
+\[
+\boxed{\Theta(mn)\text{ tempo}}
+\]
+
+\[
+\boxed{\Theta(mn)\text{ espaço}}
+\]
+
+A tabela \(c\) guarda os comprimentos das subsequências.
+
+A tabela \(b\) guarda as decisões necessárias para reconstruir a LCS.
+
+### Pegadinha
+
+- Subsequência: pode não ser contígua.
+- Substring: precisa ser contígua.
+- LCS: preserva a ordem, mas não exige contiguidade.
+
+# 4. Recorrências e análise de complexidade
+
+Uma recorrência descreve o tempo de execução de um algoritmo em função do tamanho da entrada.
+
+Exemplo:
+
+\[
+T(n)=2T(n/2)+n
+\]
+
+Ela representa um algoritmo que resolve dois subproblemas de tamanho \(n/2\) e realiza trabalho adicional linear.
+
+## 4.1 Teorema Mestre
+
+Para:
+
+\[
+T(n)=aT(n/b)+f(n)
+\]
+
+com \(a\geq1\), \(b>1\), compare:
+
+\[
+f(n)\quad\text{com}\quad n^{\log_b a}
+\]
+
+| Caso | Condição | Resultado |
+|---|---|---|
+| 1 | \(f(n)=O(n^{\log_ba-\epsilon})\) | \(\Theta(n^{\log_ba})\) |
+| 2 | \(f(n)=\Theta(n^{\log_ba})\) | \(\Theta(n^{\log_ba}\lg n)\) |
+| 3 | \(f(n)=\Omega(n^{\log_ba+\epsilon})\) | \(\Theta(f(n))\), com condição de regularidade |
+
+### Exemplos
+
+\[
+T(n)=2T(n/2)+n
+\]
+
+\[
+n^{\log_2 2}=n
+\]
+
+Caso 2:
+
+\[
+\boxed{T(n)=\Theta(n\lg n)}
+\]
+
+Outro exemplo:
+
+\[
+T(n)=4T(n/2)+n
+\]
+
+\[
+n^{\log_2 4}=n^2
+\]
+
+Caso 1:
+
+\[
+\boxed{T(n)=\Theta(n^2)}
+\]
+
+## 4.2 Notações assintóticas
+
+| Notação | Significado |
+|---|---|
+| \(O(g(n))\) | Limite superior assintótico |
+| \(\Omega(g(n))\) | Limite inferior assintótico |
+| \(\Theta(g(n))\) | Limite superior e inferior |
+| \(o(g(n))\) | Limite superior estrito |
+| \(\omega(g(n))\) | Limite inferior estrito |
+
+Exemplo:
+
+\[
+3n^2+5n+10=\Theta(n^2)
+\]
+
+O termo dominante é \(n^2\).
+
+## 4.3 Hierarquia de crescimento
+
+Do menor para o maior:
+
+\[
+1
+\]
+
+\[
+\lg n
+\]
+
+\[
+n
+\]
+
+\[
+n\lg n
+\]
+
+\[
+n^2
+\]
+
+\[
+n^3
+\]
+
+\[
+2^n
+\]
+
+\[
+n!
+\]
+
+Essa ordem é importante para comparar algoritmos e identificar limites polinomiais.
+
+---
+
+# 5. Grafos: conceitos fundamentais
+
+Um grafo é representado por:
+
+\[
+\boxed{G=(V,E)}
+\]
+
+Onde:
+
+- \(V\): conjunto de vértices.
+- \(E\): conjunto de arestas.
+
+## 5.1 Tipos de grafos
+
+| Tipo | Definição |
+|---|---|
+| Não direcionado | Arestas não possuem orientação |
+| Direcionado (digrafo) | Arestas possuem orientação |
+| Simples | Sem laços e sem arestas múltiplas |
+| Completo \(K_n\) | Todo par de vértices distintos está conectado |
+| Bipartido | Vértices podem ser divididos em dois conjuntos sem arestas internas |
+| Conexo | Existe caminho entre qualquer par de vértices |
+| Fortemente conexo | Em digrafo, existe caminho de \(u\) para \(v\) e de \(v\) para \(u\) para todos os pares |
+| DAG | Digrafo acíclico |
+
+## 5.2 Termos fundamentais
+
+| Termo | Definição |
+|---|---|
+| Grau | Número de arestas incidentes |
+| Grau de entrada | Número de arestas que chegam ao vértice |
+| Grau de saída | Número de arestas que saem do vértice |
+| Caminho | Sequência de vértices conectados por arestas |
+| Caminho simples | Não repete vértices |
+| Ciclo | Caminho que retorna ao vértice inicial |
+| Ciclo simples | Não repete vértices, exceto o inicial/final |
+| Componente conexo | Subgrafo conexo maximal |
+| Floresta | Grafo acíclico não direcionado |
+| Árvore livre | Grafo não direcionado, conexo e acíclico |
+| Árvore enraizada | Árvore com um vértice escolhido como raiz |
+| Descendente | Vértice abaixo de outro em uma árvore enraizada |
+| Ancestral | Vértice acima de outro em uma árvore enraizada |
+
+## 5.3 Propriedades importantes
+
+### Lema do aperto de mãos
+
+Em grafo não direcionado:
+
+\[
+\boxed{\sum_{v\in V}\deg(v)=2|E|}
+\]
+
+Cada aresta contribui com 2 para a soma dos graus.
+
+Consequência:
+
+\[
+\boxed{\text{Número de vértices de grau ímpar é par}}
+\]
+
+### Grafo completo
+
+\[
+\boxed{|E(K_n)|=\frac{n(n-1)}{2}}
+\]
+
+### Árvore
+
+Se \(G\) é uma árvore:
+
+\[
+\boxed{|E|=|V|-1}
+\]
+
+Propriedades equivalentes para um grafo não direcionado:
+
+- É conexo e acíclico.
+- Existe exatamente um caminho simples entre cada par de vértices.
+- Possui \(V-1\) arestas.
+
+### Grafo conexo
+
+\[
+\boxed{|E|\geq |V|-1}
+\]
+
+Um grafo conexo precisa de pelo menos \(V-1\) arestas.
+
+---
+
+# 6. Representações de grafos
+
+## 6.1 Lista de adjacência
+
+Cada vértice possui uma lista de seus vizinhos.
+
+Complexidades:
+
+| Operação | Complexidade |
+|---|---:|
+| Espaço | \(\Theta(V+E)\) |
+| BFS | \(O(V+E)\) |
+| DFS | \(O(V+E)\) |
+| Transpor grafo | \(O(V+E)\) |
+| Calcular graus de entrada | \(O(V+E)\) |
+
+É particularmente eficiente para grafos esparsos.
+
+## 6.2 Matriz de adjacência
+
+Uma matriz \(A\) representa as arestas:
+
+\[
+A[u,v]=
+\begin{cases}
+1,& (u,v)\in E\\
+0,& (u,v)\notin E
+\end{cases}
+\]
+
+Complexidade espacial:
+
+\[
+\boxed{\Theta(V^2)}
+\]
+
+| Operação | Complexidade |
+|---|---:|
+| Verificar existência de aresta | \(O(1)\) |
+| BFS | \(O(V^2)\) |
+| DFS | \(O(V^2)\) |
+| Transpor grafo | \(O(V^2)\) |
+
+## 6.3 Lista versus matriz
+
+| Característica | Lista | Matriz |
+|---|---|---|
+| Espaço | \(O(V+E)\) | \(O(V^2)\) |
+| Verificar aresta | Pode ser \(O(\deg(u))\) | \(O(1)\) |
+| Percorrer vizinhos | \(O(\deg(u))\) | \(O(V)\) |
+| BFS/DFS | \(O(V+E)\) | \(O(V^2)\) |
+
+**Pegadinha:** BFS e DFS não possuem necessariamente complexidade \(O(V+E)\). Isso depende da representação utilizada.
+
+---
+
+# 7. Busca em largura — BFS
+
+BFS explora o grafo por níveis de distância a partir de uma origem.
+
+Utiliza uma fila FIFO.
+
+## 7.1 Cores
+
+| Cor | Significado |
+|---|---|
+| WHITE | Ainda não descoberto |
+| GRAY | Descoberto, mas não finalizado |
+| BLACK | Finalizado |
+
+A BFS também utiliza:
+
+- \(d[v]\): distância da origem até \(v\).
+- \(\pi[v]\): predecessor de \(v\).
+
+## 7.2 Propriedade fundamental
+
+\[
+\boxed{d[v]=\delta(s,v)}
+\]
+
+Para vértices alcançáveis, BFS encontra a menor distância em número de arestas.
+
+## 7.3 Complexidade
+
+| Representação | Complexidade |
+|---|---:|
+| Lista de adjacência | \(O(V+E)\) |
+| Matriz de adjacência | \(O(V^2)\) |
+
+## 7.4 BFS e caminhos mínimos
+
+BFS encontra caminhos mínimos em grafos não ponderados.
+
+Não é um algoritmo geral para caminhos mínimos em grafos com pesos arbitrários.
+
+---
+
+# 8. Busca em profundidade — DFS
+
+DFS explora o máximo possível de um caminho antes de voltar.
+
+Utiliza recursão ou uma pilha.
+
+## 8.1 Tempos
+
+Cada vértice possui:
+
+- \(d[v]\): tempo de descoberta.
+- \(f[v]\): tempo de término.
+
+Sempre:
+
+\[
+\boxed{d[v]<f[v]}
+\]
+
+## 8.2 Classificação de arestas
+
+| Tipo | Significado |
+|---|---|
+| Árvore | Descobre um vértice novo |
+| Retorno | Liga um vértice a um ancestral |
+| Avanço | Liga um vértice a um descendente, sem ser aresta de árvore |
+| Cruzamento | Liga vértices de árvores diferentes ou subárvores independentes |
+
+Em digrafos:
+
+- Aresta de retorno indica ciclo.
+- DAG não possui arestas de retorno na DFS.
+
+## 8.3 Propriedade dos intervalos
+
+Para dois vértices \(u,v\), os intervalos de descoberta e término são:
+
+- Disjuntos; ou
+- Um contém o outro.
+
+Se \(v\) é descendente de \(u\):
+
+\[
+\boxed{d[u]<d[v]<f[v]<f[u]}
+\]
+
+## 8.4 Complexidade
+
+| Representação | Complexidade |
+|---|---:|
+| Lista de adjacência | \(O(V+E)\) |
+| Matriz de adjacência | \(O(V^2)\) |
+
+## 8.5 Aplicações da DFS
+
+- Detectar ciclos.
+- Ordenação topológica.
+- Encontrar componentes conexos.
+- Encontrar componentes fortemente conexos.
+
+---
+
+# 9. Ordenação topológica
+
+Uma ordenação topológica é uma ordenação linear dos vértices de um DAG tal que:
+
+\[
+\boxed{(u,v)\in E\implies u\text{ aparece antes de }v}
+\]
+
+## 9.1 Método DFS
+
+Executamos DFS e colocamos cada vértice no início da lista quando termina.
+
+A ordenação corresponde à ordem decrescente de \(f[v]\).
+
+\[
+\boxed{u.f>v.f}
+\]
+
+para toda aresta \((u,v)\) de um DAG.
+
+Complexidade:
+
+\[
+\boxed{O(V+E)}
+\]
+
+## 9.2 Método de Kahn
+
+1. Calcular os graus de entrada.
+2. Inserir os vértices de grau de entrada zero em uma fila.
+3. Remover um vértice.
+4. Reduzir os graus de entrada dos seus sucessores.
+5. Inserir sucessores cujo grau de entrada se tornou zero.
+6. Repetir.
+
+Complexidade:
+
+\[
+\boxed{O(V+E)}
+\]
+
+Se nem todos os vértices forem removidos, o grafo possui ciclo.
+
+---
+
+# 10. Componentes fortemente conexos
+
+Um componente fortemente conexo (CFC) é um conjunto maximal de vértices no qual todos são alcançáveis a partir de todos os outros.
+
+Em um digrafo:
+
+\[
+u\leadsto v
+\quad\text{e}\quad
+v\leadsto u
+\]
+
+para todos os vértices \(u,v\) pertencentes ao mesmo CFC.
+
+O algoritmo de Kosaraju utiliza:
+
+1. DFS em \(G\).
+2. Transposição \(G^T\).
+3. DFS em \(G^T\), considerando vértices em ordem decrescente de término da primeira DFS.
+
+Complexidade:
+
+\[
+\boxed{O(V+E)}
+\]
+
+A transposição inverte todas as arestas:
+
+\[
+(u,v)\in E\implies(v,u)\in E^T
+\]
+
+---
+
+# 11. Termos de complexidade computacional: P, NP e NP-Completo
+
+Esta parte é especialmente importante para questões de somatória.
+
+## 11.1 Classe P
+
+P é o conjunto de problemas de decisão que podem ser resolvidos em tempo polinomial por uma máquina determinística.
+
+Exemplos:
+
+- Ordenação topológica.
+- Caminho mínimo em grafos não ponderados.
+- 2-SAT.
+- Problema de verificar se um grafo possui um caminho entre dois vértices.
+
+Tempo polinomial significa:
+
+\[
+\boxed{O(n^k)}
+\]
+
+para alguma constante \(k\).
+
+Exemplos:
+
+\[
+O(n), O(n^2), O(n^3), O(n^{100})
+\]
+
+Todos são polinomiais.
+
+## 11.2 Classe NP
+
+NP é o conjunto de problemas de decisão que podem ser resolvidos em tempo polinomial por uma máquina não determinística.
+
+Outra interpretação importante:
+
+**Um problema pertence a NP se uma solução candidata (certificado) pode ser verificada em tempo polinomial.**
+
+Exemplo: SAT.
+
+Dada uma atribuição de valores às variáveis, podemos verificar em tempo polinomial se a fórmula é satisfazível.
+
+## 11.3 P versus NP
+
+Sabemos que:
+
+\[
+\boxed{P\subseteq NP}
+\]
+
+Todo problema que pode ser resolvido em tempo polinomial também pode ter sua solução verificada em tempo polinomial.
+
+A questão em aberto é:
+
+\[
+\boxed{P=NP\text{ ou }P\neq NP?}
+\]
+
+### Se \(P=NP\)
+
+Todos os problemas de NP possuem algoritmos determinísticos polinomiais.
+
+Consequentemente, todos os problemas NP-Completo podem ser resolvidos em tempo polinomial.
+
+### Se \(P\neq NP\)
+
+Existem problemas em NP que não pertencem a P.
+
+Consequentemente:
+
+\[
+\boxed{\text{Nenhum problema NP-Completo pertence a P}}
+\]
+
+**Importante:** ainda não sabemos se \(P=NP\) ou \(P\neq NP\).
+
+---
+
+# 12. NP-Difícil e NP-Completo
+
+## 12.1 NP-Difícil
+
+Um problema \(X\) é NP-Difícil se todos os problemas de NP podem ser reduzidos polinomialmente a \(X\).
+
+Formalmente:
+
+\[
+\boxed{\forall Y\in NP,\quad Y\leq_pX}
+\]
+
+Um problema NP-Difícil não precisa necessariamente pertencer a NP.
+
+## 12.2 NP-Completo
+
+Um problema \(X\) é NP-Completo quando:
+
+\[
+\boxed{X\in NP}
+\]
+
+e
+
+\[
+\boxed{X\text{ é NP-Difícil}}
+\]
+
+Portanto:
+
+\[
+\boxed{NP\text{-Completo}=NP\cap NP\text{-Difícil}}
+\]
+
+## 12.3 Exemplos
+
+| Problema | Classe |
+|---|---|
+| SAT | NP-Completo |
+| 3-SAT | NP-Completo |
+| Subset-Sum | NP-Completo |
+| Vertex-Cover | NP-Completo |
+| 2-SAT | P |
+| Problema da parada | Indecidível |
+
+---
+
+# 13. A árvore de NP
+
+Uma maneira de visualizar a relação entre os problemas é:
+
+
+
+A relação fundamental é:
+
+\[
+\boxed{P\subseteq NP}
+\]
+
+Os problemas NP-Completo estão dentro de NP e são os problemas mais difíceis dessa classe, no sentido de reduções polinomiais.
+
+Os problemas NP-Difícil podem estar fora de NP.
+
+## Se \(P\neq NP\)
+
+Visualmente:
+
+- P está estritamente dentro de NP.
+- NP-Completo está fora de P.
+- NP-Difícil contém os NP-Completo e também problemas possivelmente fora de NP.
+
+## Se \(P=NP\)
+
+Todos os problemas NP-Completo também pertencem a P.
+
+---
+
+# 14. Certificado e verificador
+
+Um certificado é uma informação que permite demonstrar que uma instância de um problema possui resposta SIM.
+
+Um verificador recebe:
+
+- A instância do problema.
+- Um certificado.
+
+E verifica se o certificado é válido.
+
+### Exemplo: Vertex-Cover
+
+Entrada:
+
+\[
+G=(V,E),\quad k
+\]
+
+Pergunta: existe uma cobertura de vértices de tamanho no máximo \(k\)?
+
+Certificado:
+
+\[
+S\subseteq V,\quad |S|\leq k
+\]
+
+Verificador:
+
+```text
+VERIFICA-VERTEX-COVER(G, S, k)
+    se |S| > k
+        retorna FALSO
+
+    para cada aresta (u, v) ∈ E
+        se u ∉ S e v ∉ S
+            retorna FALSO
+
+    retorna VERDADEIRO
+```
+
+Complexidade:
+
+\[
+\boxed{O(V+E)}
+\]
+
+O verificador é polinomial.
+
+Isso demonstra:
+
+\[
+\boxed{Vertex\text{-}Cover\in NP}
+\]
+
+**Pegadinha:** verificar uma solução não é necessariamente o mesmo que encontrar uma solução.
+
+---
+
+# 15. Tabela geral de complexidades
+
+Esta tabela é uma das partes mais úteis para revisar antes da prova.
+
+| Algoritmo | Complexidade temporal |
+|---|---:|
+| Rod Cutting recursivo | \(\Theta(2^n)\) |
+| Rod Cutting com memoização | \(\Theta(n^2)\) |
+| Rod Cutting bottom-up | \(\Theta(n^2)\) |
+| Fibonacci recursivo | \(\Theta(2^n)\) |
+| Fibonacci iterativo | \(\Theta(n)\) |
+| Matrix-Chain-Order | \(\Theta(n^3)\) |
+| LCS | \(\Theta(mn)\) |
+| BFS com lista | \(O(V+E)\) |
+| BFS com matriz | \(O(V^2)\) |
+| DFS com lista | \(O(V+E)\) |
+| DFS com matriz | \(O(V^2)\) |
+| Ordenação topológica | \(O(V+E)\) |
+| Kosaraju | \(O(V+E)\) |
+| Verificador de Vertex-Cover | \(O(V+E)\) |
+
+---
+
+# 16. Pegadinhas que você precisa memorizar
+
+Estas são particularmente adequadas para múltipla escolha e somatória.
+
+| Afirmação | Verdadeiro/Falso |
+|---|---|
+| Todo problema em P pertence a NP. | V |
+| Todo problema em NP pertence a P. | Não sabemos |
+| Todo NP-Completo pertence a NP. | V |
+| Todo NP-Difícil pertence a NP. | F |
+| Todo NP-Completo é NP-Difícil. | V |
+| Todo NP-Difícil é NP-Completo. | F |
+| Se um NP-Completo pertence a P, então \(P=NP\). | V |
+| Se \(P\neq NP\), nenhum NP-Completo pertence a P. | V |
+| Um algoritmo exponencial prova que o problema não pertence a P. | F |
+| \(O(n^{100})\) é polinomial. | V |
+| BFS encontra caminhos mínimos em grafos não ponderados. | V |
+| DFS encontra caminhos mínimos em qualquer grafo. | F |
+| Uma árvore possui exatamente \(V-1\) arestas. | V |
+| Todo DAG admite ordenação topológica. | V |
+| Todo grafo direcionado admite ordenação topológica. | F |
+| Todo grafo conexo possui pelo menos \(V-1\) arestas. | V |
+| Todo grafo com \(V-1\) arestas é uma árvore. | F |
+| A soma dos graus de um grafo não direcionado é \(2E\). | V |
+| A matriz de adjacência ocupa \(O(V+E)\). | F |
+| A lista de adjacência ocupa \(O(V^2)\). | F |
+
+---
+
+# 17. O que estudar prioritariamente para sua prova
+
+Se eu organizasse sua revisão visando os 8,5 pontos, separaria o conteúdo em quatro blocos.
+
+| Prioridade | Conteúdo | O que dominar |
+|---|---|---|
+| 1 | Programação dinâmica | Recorrências, condições iniciais e complexidades |
+| 2 | Grafos | BFS, DFS, árvores, DAG, ordenação topológica |
+| 3 | Complexidade computacional | P, NP, NP-Completo, certificados e verificadores |
+| 4 | Análise de algoritmos | Teorema Mestre, notações assintóticas e recorrências |
+
+## Fórmulas que você deve saber sem consultar
+
+\[
+\boxed{r_n=\max_{1\leq i\leq n}(p_i+r_{n-i})}
+\]
+
+\[
+\boxed{
+m[i,j]=\min_{i\leq k<j}
+\{m[i,k]+m[k+1,j]+p_{i-1}p_kp_j\}
+}
+\]
+
+\[
+\boxed{
+c[i,j]=
+\begin{cases}
+0,&i=0\text{ ou }j=0\\
+c[i-1,j-1]+1,&x_i=y_j\\
+\max(c[i-1,j],c[i,j-1]),&x_i\neq y_j
+\end{cases}
+}
+\]
+
+\[
+\boxed{\sum_{v\in V}\deg(v)=2E}
+\]
+
+\[
+\boxed{|E_{\text{árvore}}|=V-1}
+\]
+
+\[
+\boxed{T_{\text{BFS}}=T_{\text{DFS}}=O(V+E)}
+\]
+
+para lista de adjacência.
+
+\[
+\boxed{X\text{ NP-Completo e }X\in P\implies P=NP}
+\]
+
+---
+
+## 18. Uma estratégia eficiente para a revisão final
+
+Sugiro estudar nesta ordem:
+
+1. **Recorrências:** identificar a fórmula correta e resolver pequenos exemplos.
+2. **Programação dinâmica:** saber explicar cada termo das recorrências de haste, matrizes e LCS.
+3. **Grafos:** reconhecer propriedades de árvores, DAGs e componentes conexos.
+4. **BFS e DFS:** dominar cores, distâncias, predecessores e tempos.
+5. **P e NP:** memorizar definições e consequências lógicas.
+6. **Somatória:** treinar afirmações que misturam duas ou três propriedades.
+
+O ponto mais importante é não memorizar apenas o gabarito. Em questões de somatória, o professor pode alterar uma palavra, inverter uma implicação ou trocar a representação do grafo para tornar uma afirmação falsa.
+
+Se quiser, posso transformar este resumo em um **PDF de revisão para a prova**, organizado em capítulos, com fórmulas destacadas, tabelas de complexidade e uma seção final de pegadinhas V/F.
